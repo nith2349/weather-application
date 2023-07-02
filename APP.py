@@ -1,6 +1,7 @@
 from tkinter import *
 import requests
 import os
+from PIL import Image, ImageTk
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,38 +24,58 @@ def openweatherdata():
     windspeed = json['wind']['speed']
 
     maindata = apidata + "\n" + str(temparature) + "C"
-    additionalinfo = "\n" + "Feels like :" + str(feelslike) + "C" + "\n" + "Lowest :" + str(lowest) + "C" + "\n" + "Highest :" + str(highest) + "C" +"\n" + "Pressure :" + str(pressure) + "\n" + "Humidity :" + str(humidity) + "\n" + "Wind Speed :" + str(windspeed) + "\n" + "Visibility :" + str(visibility) 
+    additionalinfo = "\n" + "Feels like: " + str(feelslike) + "C" + "\n" + "Lowest: " + str(lowest) + "C" + "\n" + "Highest: " + str(highest) + "C" + "\n" + "Pressure: " + str(pressure) + "\n" + "Humidity: " + str(humidity) + "\n" + "Wind Speed: " + str(windspeed) + "\n" + "Visibility: " + str(visibility)
 
-    #display data
+    #Display data
     data1.config(text=maindata)
     data2.config(text=additionalinfo)
 
+    #Load weather icon
+    icon_id = json['weather'][0]['icon']
+    icon_url = "https://openweathermap.org/img/w/" + icon_id + ".png"
+    response = requests.get(icon_url, stream=True)
+    if response.status_code == 200:
+        with open("weather_icon.png", 'wb') as file:
+            file.write(response.content)
+        weather_icon = Image.open("weather_icon.png")
+        weather_icon = weather_icon.resize((100, 100), Image.ANTIALIAS)
+        weather_icon = ImageTk.PhotoImage(weather_icon)
+        icon_label.config(image=weather_icon)
+        icon_label.image = weather_icon
 
-#init Tkinter
+#Tkinter
 weatherapp = Tk()
 weatherapp.title("Weather App")
 weatherapp.geometry("720x1280")
-weatherapp.configure(bg = "white")
+weatherapp.configure(bg="#F0F0F0")
 
-#Font
-font1 = ("times",20,"bold")
-font2 = ("times",45,"bold")
+#Frame for input and button
+frame_input = Frame(weatherapp, bg="#F0F0F0")
+frame_input.pack(pady=50)
 
-#Label
-data1 = Label(weatherapp, font = font2)
-data2 = Label(weatherapp, font = font1)
-
-#entry box
-dataentry = Entry(weatherapp, justify='center', width=30,font=data2)
+#Label and entry box
+label_city = Label(frame_input, text="Enter City Name:", font=("Times", 20), bg="#F0F0F0")
+label_city.pack(side=LEFT, padx=10)
+dataentry = Entry(frame_input, justify='center', width=30, font=("Times", 20))
 dataentry.focus()
-dataentry.bind('<Return>', openweatherdata)
+dataentry.pack(side=LEFT, padx=10)
 
-checkbutton =  Button(weatherapp, text ="check",command = openweatherdata)
+#Button
+checkbutton = Button(frame_input, text="Check", command=openweatherdata, font=("Times", 20))
+checkbutton.pack(side=LEFT, padx=10)
 
-# Building Interface
-dataentry.pack(pady=35)
+#Frame for weather data
+frame_weather = Frame(weatherapp, bg="#F0F0F0")
+frame_weather.pack(pady=50)
+
+#Weather icon label
+icon_label = Label(frame_weather, bg="#F0F0F0")
+icon_label.pack()
+
+#Labels to display weather data
+data1 = Label(frame_weather, font=("Times", 45, "bold"), bg="#F0F0F0")
 data1.pack()
+data2 = Label(frame_weather, font=("Times", 20), bg="#F0F0F0")
 data2.pack()
-checkbutton.pack(pady=45)
 
 weatherapp.mainloop()
