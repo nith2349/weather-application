@@ -1,11 +1,14 @@
 from tkinter import *
 import requests
-import time
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+apikey = os.getenv("apikey")
 
 def openweatherdata():
     citiesdata = dataentry.get()
-    # apikey = 3236dede3db9ce72ee32bee8b8ae69ca
-    apilink = "https://api.openweathermap.org/data/2.5/weather?q=" + citiesdata + "&appid=3236dede3db9ce72ee32bee8b8ae69ca"
+    apilink = "https://api.openweathermap.org/data/2.5/weather?q=" + citiesdata + "&appid=" + apikey
     #K to C
     ktoc = 273.2
     json = requests.get(apilink).json()
